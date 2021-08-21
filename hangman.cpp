@@ -43,8 +43,8 @@ hangman::hangman()
         if (isFull())
             doubleSize();
         getline(in, animalList[count]);
-        for (char i : animalList[count])
-            animalList[count] = tolower(animalList[count][i]);
+        for (int i = 0; i < animalList[count].length(); i++)
+            animalList[count][i] = tolower(animalList[count][i]);
         count++;
     }
     in.close();
@@ -83,20 +83,26 @@ void hangman::setRound()
     key = randPick();
     spaces = 0;
     placeholder = new char[animalList[key].length()];
-    for (char i : animalList[key])
+    for (int i = 0; i < animalList[key].length(); i++)
     {
-        if (animalList[key][i] == ' ')
+        if (static_cast<int>(animalList[key][i]) == 32) //Ascii value for [SPACE]
         {
             placeholder[i] = ' ';
             spaces++;
         }
-        placeholder[i] = '_';
+        else
+        {
+            placeholder[i] = '_';
+        }
     }
+    //Debug
+    //cout << spaces << " spaces" << endl;
 }
 
 int hangman::randPick()
 {
-    return rand() / ((RAND_MAX / count) + 1);
+    //return rand() / ((RAND_MAX / count) + 1);
+    return 7;
 }
 
 void hangman::play()
@@ -104,15 +110,24 @@ void hangman::play()
     setRound();
     char guess;
     int unknown = animalList[key].length() - spaces;
+
+    //Debug
+    //cout << unknown << " unknown" << endl;
+    //for (int i = 0; i < animalList[key].length(); i++)
+    //    cout << animalList[key][i] << ' ';
+    //cout << endl;
+    //for (int i = 0; i < animalList[key].length(); i++)
+    //    cout << placeholder[i] << ' ';
+
     while (unknown > 0)
     {
         cout << animalList[key] << endl;
-        for (char i : animalList[key])
+        for (int i = 0; i < animalList[key].length(); i++)
             cout << placeholder[i] << ' ';
         cout << endl
              << "Please enter your guess: ";
         cin >> guess;
-        for (char i : animalList[key])
+        for (int i = 0; i < animalList[key].length(); i++)
         {
             if (guess == animalList[key][i])
             {
@@ -141,8 +156,8 @@ int main()
          << "-----------------------------------------" << endl;
     do
     {
-        //cout << endl
-        //     << "currently playing" << endl;
+        cout << endl
+             << "currently playing" << endl;
         game.play();
     } while (game.isPlaying());
 
