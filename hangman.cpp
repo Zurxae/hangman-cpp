@@ -12,21 +12,23 @@ class hangman
 public:
     hangman();         //initializes animal list array from input file
     ~hangman();        //deallocates dynamic array memory
+    void intro();      //Introduces user to game
     void doubleSize(); //doubles size of dynamic array if full
     bool isFull();     //checks if array is full
     bool isPlaying();  //returns whether player wants to continue playing
     void setRound();
-    int randPick();
-    void play();
+    void guessFilter(char guessList[], char &guess, int &guessCount); //Inputs and removes repeated guess from going through character matching
+    int randPick();                                                   //Picks random index from array of animals
+    void drawMan(int lives);                                          //Draws status of hanging man depending on # of lives
+    void play();                                                      //Inclues call to randPick(), setRound(), drawMan(), and has game logic;
 
 private:
-    int size;
-    int count;
-    string *animalList;
-    char choice;
-    char *placeholder;
-    int spaces;
-    int key;
+    int size;           //capacity of animalList array
+    int count;          //# of animals in animalList array
+    string *animalList; //array of animals
+    char *placeholder;  //output for user to see progress on guessing word
+    int spaces;         //# of spaces in chosen word
+    int key;            //random chosen word index
 };
 
 hangman::hangman()
@@ -50,6 +52,16 @@ hangman::hangman()
     in.close();
 }
 
+void hangman::intro()
+{
+    cout << endl
+         << "-----------------------------------------" << endl
+         << "Welcome to my hangman game." << endl
+         << "The possible answers will all be animals." << endl
+         << "Good luck!" << endl
+         << "-----------------------------------------" << endl;
+}
+
 void hangman::doubleSize()
 {
     size *= 2;
@@ -68,6 +80,7 @@ bool hangman::isFull()
 
 bool hangman::isPlaying()
 {
+    char choice;
     cout << endl
          << "-----------------------------------" << endl
          << "Would you like to play again (Y/N)?" << endl
@@ -95,46 +108,183 @@ void hangman::setRound()
             placeholder[i] = '_';
         }
     }
-    //Debug
-    //cout << spaces << " spaces" << endl;
 }
 
 int hangman::randPick()
 {
-    //return rand() / ((RAND_MAX / count) + 1);
-    return 7;
+    return rand() / ((RAND_MAX / count) + 1);
+}
+
+void hangman::guessFilter(char guessList[], char &guess, int &guessCount)
+{
+    bool guessFound = true;
+
+    while (guessFound)
+    {
+        cout << endl
+             << endl
+             << "Please enter your guess: ";
+        cin >> guess;
+        guess = tolower(guess);
+        guessFound = false;
+
+        for (int i = 0; i < guessCount; i++)
+        {
+            if (guess == guessList[i])
+            {
+                cout << endl
+                     << "----------------------------------"
+                     << endl
+                     << "Letter already guessed. Try again."
+                     << endl
+                     << "----------------------------------"
+                     << endl;
+                guessFound = true;
+                break;
+            }
+        }
+    }
+    guessList[guessCount] = guess;
+    guessCount++;
+}
+
+void hangman::drawMan(int lives)
+{
+    /*
+    Drawings/code from:
+    http://www.cplusplus.com/forum/beginner/2439/
+    User: "chosen1"
+    */
+    switch (lives)
+    {
+    case 1:
+        cout << " ___________" << endl;
+        cout << " |         }" << endl;
+        cout << " |       \\  " << endl;
+        cout << "_|______________" << endl;
+        break;
+    case 2:
+        cout << " ___________" << endl;
+        cout << " |         }" << endl;
+        cout << " |       \\ 0 " << endl;
+        cout << "_|______________" << endl;
+        break;
+    case 3:
+        cout << " ___________" << endl;
+        cout << " |         }" << endl;
+        cout << " |       \\ 0 /" << endl;
+        cout << "_|______________" << endl;
+        break;
+    case 4:
+        cout << " ___________" << endl;
+        cout << " |         }" << endl;
+        cout << " |       \\ 0 /" << endl;
+        cout << " |         |" << endl;
+        cout << "_|______________" << endl;
+        break;
+    case 5:
+        cout << " ___________" << endl;
+        cout << " |         }" << endl;
+        cout << " |       \\ 0 /" << endl;
+        cout << " |         |" << endl;
+        cout << " |        /  " << endl;
+        cout << "_|______________" << endl;
+        break;
+    case 6:
+        cout << " ___________" << endl;
+        cout << " |         }" << endl;
+        cout << " |       \\ 0 /" << endl;
+        cout << " |         |" << endl;
+        cout << " |        / \\ " << endl;
+        cout << "_|______________" << endl;
+    }
 }
 
 void hangman::play()
 {
     setRound();
     char guess;
+    char guessList[26];
+    int guessCount = 0;
+    //bool guessFound;
     int unknown = animalList[key].length() - spaces;
+    int lives = 6;
+    bool found = true;
 
-    //Debug
-    //cout << unknown << " unknown" << endl;
-    //for (int i = 0; i < animalList[key].length(); i++)
-    //    cout << animalList[key][i] << ' ';
-    //cout << endl;
-    //for (int i = 0; i < animalList[key].length(); i++)
-    //    cout << placeholder[i] << ' ';
-
-    while (unknown > 0)
+    while (unknown > 0 && lives > 0)
     {
-        cout << animalList[key] << endl;
+        drawMan(lives);
+        cout << endl
+             << animalList[key] << endl;
+
         for (int i = 0; i < animalList[key].length(); i++)
             cout << placeholder[i] << ' ';
-        cout << endl
-             << "Please enter your guess: ";
-        cin >> guess;
+
+        guessFilter(guessList, guess, guessCount);
+        //guessFound = true;
+        //
+        //while (guessFound)
+        //{
+        //    cout << endl
+        //         << endl
+        //         << "Please enter your guess: ";
+        //    cin >> guess;
+        //    guess = tolower(guess);
+        //    guessFound = false;
+        //
+        //    for (int i = 0; i < guessCount; i++)
+        //    {
+        //        if (guess == guessList[i])
+        //        {
+        //            cout << endl
+        //                 << "----------------------------------"
+        //                 << endl
+        //                 << "Letter already guessed. Try again."
+        //                 << endl
+        //                 << "----------------------------------"
+        //                 << endl;
+        //            guessFound = true;
+        //            break;
+        //        }
+        //    }
+        //}
+        //guessList[guessCount] = guess;
+        //guessCount++;
+
         for (int i = 0; i < animalList[key].length(); i++)
         {
             if (guess == animalList[key][i])
             {
                 placeholder[i] = animalList[key][i];
+                found = true;
                 unknown--;
             }
         }
+        if (!found)
+            lives--;
+        found = false;
+    }
+    if (unknown == 0)
+    {
+        cout << endl
+             << "************************"
+             << endl
+             << "Congradulations! You win"
+             << endl
+             << "************************"
+             << endl;
+    }
+    else
+    {
+        cout << endl
+             << "Answer: " << animalList[key] << endl
+             << endl
+             << ":( :( :( :( :("
+             << endl
+             << "Sucks to suck"
+             << endl
+             << ":( :( :( :( :("
+             << endl;
     }
 }
 
@@ -150,18 +300,20 @@ int main()
     //Initialize random seed
     srand(time(NULL));
 
-    cout << endl
-         << "-----------------------------------------" << endl
-         << "Welcome to my hangman game and good luck!" << endl
-         << "-----------------------------------------" << endl;
+    //Intro
+    game.intro();
+
     do
     {
-        cout << endl
-             << "currently playing" << endl;
         game.play();
     } while (game.isPlaying());
 
     cout << endl
-         << "Thanks for playing" << endl;
+         << "##################"
+         << endl
+         << "Thanks for playing"
+         << endl
+         << "##################"
+         << endl;
     return 0;
 }
