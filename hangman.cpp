@@ -2,7 +2,7 @@
 #include <fstream>  //input stream
 #include <string>   //string tools
 #include <stdlib.h> //srand, rand
-#include <time.h>   //time
+#include <time.h>   //time for rand function
 #include <ctype.h>  //tolower()
 
 using namespace std;
@@ -19,8 +19,12 @@ public:
     void setRound();
     void guessFilter(char guessList[], char &guess, int &guessCount); //Inputs and removes repeated guess from going through character matching
     int randPick();                                                   //Picks random index from array of animals
-    void drawMan(int lives);                                          //Draws status of hanging man depending on # of lives
-    void play();                                                      //Inclues call to randPick(), setRound(), drawMan(), and has game logic;
+    void drawMan(const int lives);                                    //Draws status of hanging man depending on # of lives
+    void charMatcher(char guess, int &unknown, int &lives);           //Checks if guess matches any letter in chosen word
+    void displayWin();
+    void displayLoss();
+    void play(); //Inclues call to randPick(), setRound(), drawMan(), and has game logic;
+    void outro();
 
 private:
     int size;           //capacity of animalList array
@@ -200,16 +204,55 @@ void hangman::drawMan(int lives)
     }
 }
 
+void hangman::charMatcher(char guess, int &unknown, int &lives)
+{
+    bool found = false;
+    for (int i = 0; i < animalList[key].length(); i++)
+    {
+        if (guess == animalList[key][i])
+        {
+            placeholder[i] = animalList[key][i];
+            found = true;
+            unknown--;
+        }
+    }
+    if (!found)
+        lives--;
+}
+
+void hangman::displayWin()
+{
+    cout << endl
+         << "************************"
+         << endl
+         << "Congradulations! You win"
+         << endl
+         << "************************"
+         << endl;
+}
+
+void hangman::displayLoss()
+{
+    cout << endl
+         << "Answer: " << animalList[key] << endl
+         << endl
+         << ":( :( :( :( :("
+         << endl
+         << "Sucks to suck"
+         << endl
+         << ":( :( :( :( :("
+         << endl;
+}
+
 void hangman::play()
 {
     setRound();
     char guess;
     char guessList[26];
     int guessCount = 0;
-    //bool guessFound;
+
     int unknown = animalList[key].length() - spaces;
     int lives = 6;
-    bool found = true;
 
     while (unknown > 0 && lives > 0)
     {
@@ -220,72 +263,26 @@ void hangman::play()
         for (int i = 0; i < animalList[key].length(); i++)
             cout << placeholder[i] << ' ';
 
-        guessFilter(guessList, guess, guessCount);
-        //guessFound = true;
-        //
-        //while (guessFound)
-        //{
-        //    cout << endl
-        //         << endl
-        //         << "Please enter your guess: ";
-        //    cin >> guess;
-        //    guess = tolower(guess);
-        //    guessFound = false;
-        //
-        //    for (int i = 0; i < guessCount; i++)
-        //    {
-        //        if (guess == guessList[i])
-        //        {
-        //            cout << endl
-        //                 << "----------------------------------"
-        //                 << endl
-        //                 << "Letter already guessed. Try again."
-        //                 << endl
-        //                 << "----------------------------------"
-        //                 << endl;
-        //            guessFound = true;
-        //            break;
-        //        }
-        //    }
-        //}
-        //guessList[guessCount] = guess;
-        //guessCount++;
+        guessFilter(guessList, guess, guessCount); //also inputs guess
 
-        for (int i = 0; i < animalList[key].length(); i++)
-        {
-            if (guess == animalList[key][i])
-            {
-                placeholder[i] = animalList[key][i];
-                found = true;
-                unknown--;
-            }
-        }
-        if (!found)
-            lives--;
-        found = false;
+        charMatcher(guess, unknown, lives);
     }
+
     if (unknown == 0)
-    {
-        cout << endl
-             << "************************"
-             << endl
-             << "Congradulations! You win"
-             << endl
-             << "************************"
-             << endl;
-    }
+        displayWin();
     else
-    {
-        cout << endl
-             << "Answer: " << animalList[key] << endl
-             << endl
-             << ":( :( :( :( :("
-             << endl
-             << "Sucks to suck"
-             << endl
-             << ":( :( :( :( :("
-             << endl;
-    }
+        displayLoss();
+}
+
+void hangman::outro()
+{
+    cout << endl
+         << "##################"
+         << endl
+         << "Thanks for playing"
+         << endl
+         << "##################"
+         << endl;
 }
 
 hangman::~hangman()
@@ -308,12 +305,7 @@ int main()
         game.play();
     } while (game.isPlaying());
 
-    cout << endl
-         << "##################"
-         << endl
-         << "Thanks for playing"
-         << endl
-         << "##################"
-         << endl;
+    game.outro();
+
     return 0;
 }
